@@ -87,6 +87,8 @@ github.com/openshift/api v3.9.0+incompatible h1:fJ/KsefYuZAjmrr3+5U9yZIZbTOpVkDD
 github.com/openshift/api v3.9.0+incompatible/go.mod h1:dh9o4Fs58gpFXGSYfnVxGR9PnV53I8TW84pQaJDdGiY=
 github.com/openshift/client-go v0.0.0-20231110140829-a6ca51f6d5ba h1:uZ9gqdJIKUegxqeBqKXbPdd0JfO6aueQ2Ot/gTOhkD8=
 github.com/openshift/client-go v0.0.0-20231110140829-a6ca51f6d5ba/go.mod h1:/BACtJX3fnHOlecTC3VW7JPsJU7KCGaUqt/HkWp5ryo=
+github.com/openshift/client-go v0.0.0-20231212205830-0ab0864ec8c2 h1:ArsCqZ2t7Jepm44YxW/4t2q1bPcqiyn5erNwpfbk8dE=
+github.com/openshift/client-go v0.0.0-20231212205830-0ab0864ec8c2/go.mod h1:rk91ouw63QUVu2NfUt09MSJT4W54q5J5EV94f87jNC8=
 github.com/parnurzeal/gorequest v0.2.16 h1:T/5x+/4BT+nj+3eSknXmCTnEVGSzFzPGdpqmUVVZXHQ=
 github.com/parnurzeal/gorequest v0.2.16/go.mod h1:3Kh2QUMJoqw3icWAecsyzkpY7UzRfDhbRdTjtNwNiUE=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
