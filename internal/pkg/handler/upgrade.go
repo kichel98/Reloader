@@ -197,14 +197,17 @@ func PerformRollingUpgrade(clients kube.Clients, config util.Config, upgradeFunc
 		annotationValue, found := annotations[config.Annotation]
 		searchAnnotationValue, foundSearchAnn := annotations[options.AutoSearchAnnotation]
 		reloaderEnabledValue, foundAuto := annotations[options.ReloaderAutoAnnotation]
-		if !found && !foundAuto && !foundSearchAnn {
+		typedAutoAnnotationEnabledValue, foundTypedAuto := annotations[config.TypedAutoAnnotation]
+		if !found && !foundAuto && !foundSearchAnn && !foundTypedAuto {
 			annotations = upgradeFuncs.PodAnnotationsFunc(i)
 			annotationValue = annotations[config.Annotation]
 			searchAnnotationValue = annotations[options.AutoSearchAnnotation]
 			reloaderEnabledValue = annotations[options.ReloaderAutoAnnotation]
+			typedAutoAnnotationEnabledValue = annotations[config.TypedAutoAnnotation]
 		}
 		result := constants.NotUpdated
 		reloaderEnabled, _ := strconv.ParseBool(reloaderEnabledValue)
+		typedAutoAnnotationEnabled, _ = strconv.ParseBool(typedAutoAnnotationEnabledValue)
 		if reloaderEnabled || reloaderEnabledValue == "" && options.AutoReloadAll {
 			result = invokeReloadStrategy(upgradeFuncs, i, config, true)
 		}
@@ -337,7 +340,7 @@ func getContainerWithEnvReference(containers []v1.Container, resourceName string
 	return nil
 }
 
-func getContainerUsingResource(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool) *v1.Container {
+func getContainerUsingResource(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool, typedAutoReload bool) *v1.Container {
 	volumes := upgradeFuncs.VolumesFunc(item)
 	containers := upgradeFuncs.ContainersFunc(item)
 	initContainers := upgradeFuncs.InitContainersFunc(item)
@@ -376,16 +379,16 @@ func getContainerUsingResource(upgradeFuncs callbacks.RollingUpgradeFuncs, item 
 	return container
 }
 
-func invokeReloadStrategy(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool) constants.Result {
+func invokeReloadStrategy(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool, typedAutoReload bool) constants.Result {
 	if options.ReloadStrategy == constants.AnnotationsReloadStrategy {
-		return updatePodAnnotations(upgradeFuncs, item, config, autoReload)
+		return updatePodAnnotations(upgradeFuncs, item, config, autoReload, typedAutoReload)
 	}
 
-	return updateContainerEnvVars(upgradeFuncs, item, config, autoReload)
+	return updateContainerEnvVars(upgradeFuncs, item, config, autoReload, typedAutoReload)
 }
 
-func updatePodAnnotations(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool) constants.Result {
-	container := getContainerUsingResource(upgradeFuncs, item, config, autoReload)
+func updatePodAnnotations(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool, typedAutoReload bool) constants.Result {
+	container := getContainerUsingResource(upgradeFuncs, item, config, autoReload, typedAutoReload)
 	if container == nil {
 		return constants.NoContainerFound
 	}
@@ -436,10 +439,10 @@ func createReloadedAnnotations(target *util.ReloadSource) (map[string]string, er
 	return annotations, nil
 }
 
-func updateContainerEnvVars(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool) constants.Result {
+func updateContainerEnvVars(upgradeFuncs callbacks.RollingUpgradeFuncs, item runtime.Object, config util.Config, autoReload bool, typedAutoReload bool) constants.Result {
 	var result constants.Result
 	envVar := constants.EnvVarPrefix + util.ConvertToEnvVarName(config.ResourceName) + "_" + config.Type
-	container := getContainerUsingResource(upgradeFuncs, item, config, autoReload)
+	container := getContainerUsingResource(upgradeFuncs, item, config, autoReload, typedAutoReload)
 
 	if container == nil {
 		return constants.NoContainerFound
