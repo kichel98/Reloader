@@ -207,9 +207,13 @@ func PerformRollingUpgrade(clients kube.Clients, config util.Config, upgradeFunc
 		}
 		result := constants.NotUpdated
 		reloaderEnabled, _ := strconv.ParseBool(reloaderEnabledValue)
-		typedAutoAnnotationEnabled, _ = strconv.ParseBool(typedAutoAnnotationEnabledValue)
-		if reloaderEnabled || reloaderEnabledValue == "" && options.AutoReloadAll {
-			result = invokeReloadStrategy(upgradeFuncs, i, config, true)
+		typedAutoAnnotationEnabled, _ := strconv.ParseBool(typedAutoAnnotationEnabledValue)
+		if reloaderEnabledValue == "" && options.AutoReloadAll { // TODO: check
+			result = invokeReloadStrategy(upgradeFuncs, i, config, true, typedAutoAnnotationEnabled) // TODO: check
+		}
+
+		if result != constants.Updated && (reloaderEnabled || typedAutoAnnotationEnabled) { // TODO: check
+			result = invokeReloadStrategy(upgradeFuncs, i, config, reloaderEnabled, typedAutoAnnotationEnabled) // TODO: check
 		}
 
 		if result != constants.Updated && annotationValue != "" {
@@ -218,7 +222,7 @@ func PerformRollingUpgrade(clients kube.Clients, config util.Config, upgradeFunc
 				value = strings.TrimSpace(value)
 				re := regexp.MustCompile("^" + value + "$")
 				if re.Match([]byte(config.ResourceName)) {
-					result = invokeReloadStrategy(upgradeFuncs, i, config, false)
+					result = invokeReloadStrategy(upgradeFuncs, i, config, false, false)
 					if result == constants.Updated {
 						break
 					}
@@ -229,7 +233,7 @@ func PerformRollingUpgrade(clients kube.Clients, config util.Config, upgradeFunc
 		if result != constants.Updated && searchAnnotationValue == "true" {
 			matchAnnotationValue := config.ResourceAnnotations[options.SearchMatchAnnotation]
 			if matchAnnotationValue == "true" {
-				result = invokeReloadStrategy(upgradeFuncs, i, config, true)
+				result = invokeReloadStrategy(upgradeFuncs, i, config, true, typedAutoAnnotationEnabled) // TODO: check
 			}
 		}
 
