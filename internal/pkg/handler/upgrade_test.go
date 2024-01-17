@@ -25,44 +25,48 @@ import (
 var (
 	clients = kube.Clients{KubernetesClient: testclient.NewSimpleClientset()}
 
-	arsNamespace                           = "test-handler-" + testutil.RandSeq(5)
-	arsConfigmapName                       = "testconfigmap-handler-" + testutil.RandSeq(5)
-	arsSecretName                          = "testsecret-handler-" + testutil.RandSeq(5)
-	arsProjectedConfigMapName              = "testprojectedconfigmap-handler-" + testutil.RandSeq(5)
-	arsProjectedSecretName                 = "testprojectedsecret-handler-" + testutil.RandSeq(5)
-	arsConfigmapWithInitContainer          = "testconfigmapInitContainerhandler-" + testutil.RandSeq(5)
-	arsSecretWithInitContainer             = "testsecretWithInitContainer-handler-" + testutil.RandSeq(5)
-	arsProjectedConfigMapWithInitContainer = "testProjectedConfigMapWithInitContainer-handler" + testutil.RandSeq(5)
-	arsProjectedSecretWithInitContainer    = "testProjectedSecretWithInitContainer-handler" + testutil.RandSeq(5)
-	arsConfigmapWithInitEnv                = "configmapWithInitEnv-" + testutil.RandSeq(5)
-	arsSecretWithInitEnv                   = "secretWithInitEnv-handler-" + testutil.RandSeq(5)
-	arsConfigmapWithEnvName                = "testconfigmapWithEnv-handler-" + testutil.RandSeq(5)
-	arsConfigmapWithEnvFromName            = "testconfigmapWithEnvFrom-handler-" + testutil.RandSeq(5)
-	arsSecretWithEnvName                   = "testsecretWithEnv-handler-" + testutil.RandSeq(5)
-	arsSecretWithEnvFromName               = "testsecretWithEnvFrom-handler-" + testutil.RandSeq(5)
-	arsConfigmapWithPodAnnotations         = "testconfigmapPodAnnotations-handler-" + testutil.RandSeq(5)
-	arsConfigmapWithBothAnnotations        = "testconfigmapBothAnnotations-handler-" + testutil.RandSeq(5)
-	arsConfigmapAnnotated                  = "testconfigmapAnnotated-handler-" + testutil.RandSeq(5)
-	arsConfigMapWithNonAnnotatedDeployment = "testconfigmapNonAnnotatedDeployment-handler-" + testutil.RandSeq(5)
+	arsNamespace                            = "test-handler-" + testutil.RandSeq(5)
+	arsConfigmapName                        = "testconfigmap-handler-" + testutil.RandSeq(5)
+	arsSecretName                           = "testsecret-handler-" + testutil.RandSeq(5)
+	arsProjectedConfigMapName               = "testprojectedconfigmap-handler-" + testutil.RandSeq(5)
+	arsProjectedSecretName                  = "testprojectedsecret-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithInitContainer           = "testconfigmapInitContainerhandler-" + testutil.RandSeq(5)
+	arsSecretWithInitContainer              = "testsecretWithInitContainer-handler-" + testutil.RandSeq(5)
+	arsProjectedConfigMapWithInitContainer  = "testProjectedConfigMapWithInitContainer-handler" + testutil.RandSeq(5)
+	arsProjectedSecretWithInitContainer     = "testProjectedSecretWithInitContainer-handler" + testutil.RandSeq(5)
+	arsConfigmapWithInitEnv                 = "configmapWithInitEnv-" + testutil.RandSeq(5)
+	arsSecretWithInitEnv                    = "secretWithInitEnv-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithEnvName                 = "testconfigmapWithEnv-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithEnvFromName             = "testconfigmapWithEnvFrom-handler-" + testutil.RandSeq(5)
+	arsSecretWithEnvName                    = "testsecretWithEnv-handler-" + testutil.RandSeq(5)
+	arsSecretWithEnvFromName                = "testsecretWithEnvFrom-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithPodAnnotations          = "testconfigmapPodAnnotations-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithBothAnnotations         = "testconfigmapBothAnnotations-handler-" + testutil.RandSeq(5)
+	arsConfigmapAnnotated                   = "testconfigmapAnnotated-handler-" + testutil.RandSeq(5)
+	arsConfigMapWithNonAnnotatedDeployment  = "testconfigmapNonAnnotatedDeployment-handler-" + testutil.RandSeq(5)
+	arsSecretWithSecretAutoAnnotation       = "testsecretWithSecretAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithConfigMapAutoAnnotation = "testconfigmapWithConfigmapAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
 
-	ersNamespace                           = "test-handler-" + testutil.RandSeq(5)
-	ersConfigmapName                       = "testconfigmap-handler-" + testutil.RandSeq(5)
-	ersSecretName                          = "testsecret-handler-" + testutil.RandSeq(5)
-	ersProjectedConfigMapName              = "testprojectedconfigmap-handler-" + testutil.RandSeq(5)
-	ersProjectedSecretName                 = "testprojectedsecret-handler-" + testutil.RandSeq(5)
-	ersConfigmapWithInitContainer          = "testconfigmapInitContainerhandler-" + testutil.RandSeq(5)
-	ersSecretWithInitContainer             = "testsecretWithInitContainer-handler-" + testutil.RandSeq(5)
-	ersProjectedConfigMapWithInitContainer = "testProjectedConfigMapWithInitContainer-handler" + testutil.RandSeq(5)
-	ersProjectedSecretWithInitContainer    = "testProjectedSecretWithInitContainer-handler" + testutil.RandSeq(5)
-	ersConfigmapWithInitEnv                = "configmapWithInitEnv-" + testutil.RandSeq(5)
-	ersSecretWithInitEnv                   = "secretWithInitEnv-handler-" + testutil.RandSeq(5)
-	ersConfigmapWithEnvName                = "testconfigmapWithEnv-handler-" + testutil.RandSeq(5)
-	ersConfigmapWithEnvFromName            = "testconfigmapWithEnvFrom-handler-" + testutil.RandSeq(5)
-	ersSecretWithEnvName                   = "testsecretWithEnv-handler-" + testutil.RandSeq(5)
-	ersSecretWithEnvFromName               = "testsecretWithEnvFrom-handler-" + testutil.RandSeq(5)
-	ersConfigmapWithPodAnnotations         = "testconfigmapPodAnnotations-handler-" + testutil.RandSeq(5)
-	ersConfigmapWithBothAnnotations        = "testconfigmapBothAnnotations-handler-" + testutil.RandSeq(5)
-	ersConfigmapAnnotated                  = "testconfigmapAnnotated-handler-" + testutil.RandSeq(5)
+	ersNamespace                            = "test-handler-" + testutil.RandSeq(5)
+	ersConfigmapName                        = "testconfigmap-handler-" + testutil.RandSeq(5)
+	ersSecretName                           = "testsecret-handler-" + testutil.RandSeq(5)
+	ersProjectedConfigMapName               = "testprojectedconfigmap-handler-" + testutil.RandSeq(5)
+	ersProjectedSecretName                  = "testprojectedsecret-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithInitContainer           = "testconfigmapInitContainerhandler-" + testutil.RandSeq(5)
+	ersSecretWithInitContainer              = "testsecretWithInitContainer-handler-" + testutil.RandSeq(5)
+	ersProjectedConfigMapWithInitContainer  = "testProjectedConfigMapWithInitContainer-handler" + testutil.RandSeq(5)
+	ersProjectedSecretWithInitContainer     = "testProjectedSecretWithInitContainer-handler" + testutil.RandSeq(5)
+	ersConfigmapWithInitEnv                 = "configmapWithInitEnv-" + testutil.RandSeq(5)
+	ersSecretWithInitEnv                    = "secretWithInitEnv-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithEnvName                 = "testconfigmapWithEnv-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithEnvFromName             = "testconfigmapWithEnvFrom-handler-" + testutil.RandSeq(5)
+	ersSecretWithEnvName                    = "testsecretWithEnv-handler-" + testutil.RandSeq(5)
+	ersSecretWithEnvFromName                = "testsecretWithEnvFrom-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithPodAnnotations          = "testconfigmapPodAnnotations-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithBothAnnotations         = "testconfigmapBothAnnotations-handler-" + testutil.RandSeq(5)
+	ersConfigmapAnnotated                   = "testconfigmapAnnotated-handler-" + testutil.RandSeq(5)
+	ersSecretWithSecretAutoAnnotation       = "testsecretWithSecretAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithConfigMapAutoAnnotation = "testconfigmapWithConfigmapAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
 )
 
 func TestMain(m *testing.M) {
@@ -179,6 +183,18 @@ func setupArs() {
 		logrus.Errorf("Error in configmap creation: %v", err)
 	}
 
+	// Creating secret used with secret auto annotation
+	_, err = testutil.CreateSecret(clients.KubernetesClient, arsNamespace, arsSecretWithSecretAutoAnnotation, data)
+	if err != nil {
+		logrus.Errorf("Error in secret creation: %v", err)
+	}
+
+	// Creating configmap used with configmap auto annotation
+	_, err = testutil.CreateConfigMap(clients.KubernetesClient, arsNamespace, arsConfigmapWithConfigMapAutoAnnotation, "www.google.com")
+	if err != nil {
+		logrus.Errorf("Error in configmap creation: %v", err)
+	}	
+
 	// Creating Deployment with configmap
 	_, err = testutil.CreateDeployment(clients.KubernetesClient, arsConfigmapName, arsNamespace, true)
 	if err != nil {
@@ -278,6 +294,12 @@ func setupArs() {
 	_, err = testutil.CreateDeploymentWithEnvVarSourceAndAnnotations(clients.KubernetesClient, arsConfigMapWithNonAnnotatedDeployment, arsNamespace, map[string]string{})
 	if err != nil {
 		logrus.Errorf("Error in Deployment with configmap and without annotation creation: %v", err)
+	}
+
+	// Creating Deployment with secret and with secret auto annotation
+	_, err = testutil.CreateDeploymentWithTypedAutoAnnotation(clients.KubernetesClient, arsSecretWithSecretAutoAnnotation, arsNamespace, "secret")
+	if err != nil {
+		logrus.Errorf("Error in Deployment with secret and with secret auto annotation: %v", err)
 	}
 
 	// Creating DaemonSet with configmap
@@ -469,6 +491,12 @@ func teardownArs() {
 		logrus.Errorf("Error while deleting deployment with search annotation %v", deploymentError)
 	}
 
+	// Deleting Deployment with secret and secret auto annotation
+	deploymentError = testutil.DeleteDeployment(clients.KubernetesClient, arsNamespace, arsSecretWithSecretAutoAnnotation)
+	if deploymentError != nil {
+		logrus.Errorf("Error while deleting deployment with secret auto annotation %v", deploymentError)
+	}
+
 	// Deleting DaemonSet with configmap
 	daemonSetError := testutil.DeleteDaemonSet(clients.KubernetesClient, arsNamespace, arsConfigmapName)
 	if daemonSetError != nil {
@@ -630,6 +658,18 @@ func teardownArs() {
 		logrus.Errorf("Error while deleting the configmap used with pod annotations: %v", err)
 	}
 
+	// Deleting Secret used with secret auto annotation
+	err = testutil.DeleteSecret(clients.KubernetesClient, arsNamespace, arsSecretWithSecretAutoAnnotation)
+	if err != nil {
+		logrus.Errorf("Error while deleting the secret used with secret auto annotations: %v", err)
+	}
+
+	// Deleting ConfigMap used with configmap auto annotation
+	err = testutil.DeleteConfigMap(clients.KubernetesClient, arsNamespace, arsConfigmapWithConfigMapAutoAnnotation)
+	if err != nil {
+		logrus.Errorf("Error while deleting the configmap used with configmap auto annotations: %v", err)
+	}
+
 	// Deleting namespace
 	testutil.DeleteNamespace(arsNamespace, clients.KubernetesClient)
 
@@ -718,6 +758,18 @@ func setupErs() {
 	}
 
 	_, err = testutil.CreateConfigMap(clients.KubernetesClient, ersNamespace, ersConfigmapWithPodAnnotations, "www.google.com")
+	if err != nil {
+		logrus.Errorf("Error in configmap creation: %v", err)
+	}
+
+	// Creating secret used with secret auto annotation
+	_, err = testutil.CreateSecret(clients.KubernetesClient, ersNamespace, ersSecretWithSecretAutoAnnotation, data)
+	if err != nil {
+		logrus.Errorf("Error in secret creation: %v", err)
+	}
+
+	// Creating configmap used with configmap auto annotation
+	_, err = testutil.CreateConfigMap(clients.KubernetesClient, ersNamespace, ersConfigmapWithConfigMapAutoAnnotation, "www.google.com")
 	if err != nil {
 		logrus.Errorf("Error in configmap creation: %v", err)
 	}
@@ -1164,6 +1216,18 @@ func teardownErs() {
 	err = testutil.DeleteConfigMap(clients.KubernetesClient, ersNamespace, ersConfigmapWithPodAnnotations)
 	if err != nil {
 		logrus.Errorf("Error while deleting the configmap used with pod annotations: %v", err)
+	}
+
+	// Deleting Secret used with secret auto annotation
+	err = testutil.DeleteSecret(clients.KubernetesClient, ersNamespace, ersSecretWithSecretAutoAnnotation)
+	if err != nil {
+		logrus.Errorf("Error while deleting the secret used with secret auto annotation: %v", err)
+	}
+
+	// Deleting ConfigMap used with configmap auto annotation
+	err = testutil.DeleteConfigMap(clients.KubernetesClient, ersNamespace, ersConfigmapWithConfigMapAutoAnnotation)
+	if err != nil {
+		logrus.Errorf("Error while deleting the configmap used with configmap auto annotation: %v", err)
 	}
 
 	// Deleting namespace
