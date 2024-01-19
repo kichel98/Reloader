@@ -79,22 +79,24 @@ func getObjectMeta(namespace string, name string, autoReload bool, secretAutoRel
 }
 
 func getAnnotations(name string, autoReload bool, secretAutoReload bool, configmapAutoReload bool) map[string]string {
+	annotations := make(map[string]string)
 	if autoReload {
-		return map[string]string{
-			options.ReloaderAutoAnnotation: "true"}
+		annotations[options.ReloaderAutoAnnotation] = "true"
 	}
 	if secretAutoReload {
-		return map[string]string{
-			options.SecretReloaderAutoAnnotation: "true"}
+		annotations[options.SecretReloaderAutoAnnotation] = "true"
 	}
 	if configmapAutoReload {
-		return map[string]string{
-			options.ConfigmapReloaderAutoAnnotation: "true"}
+		annotations[options.ConfigmapReloaderAutoAnnotation] = "true"
 	}
 
-	return map[string]string{
-		options.ConfigmapUpdateOnChangeAnnotation: name,
-		options.SecretUpdateOnChangeAnnotation:    name}
+	if len(annotations) > 0 {
+		return annotations
+	} else {
+		return map[string]string{
+			options.ConfigmapUpdateOnChangeAnnotation: name,
+			options.SecretUpdateOnChangeAnnotation:    name}
+	}
 }
 
 func getEnvVarSources(name string) []v1.EnvFromSource {
@@ -480,9 +482,9 @@ func GetDeploymentWithPodAnnotations(namespace string, deploymentName string, bo
 func GetDeploymentWithTypedAutoAnnotation(namespace string, deploymentName string, resourceType string) *appsv1.Deployment {
 	replicaset := int32(1)
 	var objectMeta metav1.ObjectMeta
-	if resourceType == "secret" {
+	if resourceType == SecretResourceType {
 		objectMeta = getObjectMeta(namespace, deploymentName, false, true, false)
-	} else if resourceType == "configmap" {
+	} else if resourceType == ConfigmapResourceType {
 		objectMeta = getObjectMeta(namespace, deploymentName, false, false, true)
 	}
 

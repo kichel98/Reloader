@@ -44,8 +44,8 @@ var (
 	arsConfigmapWithBothAnnotations         = "testconfigmapBothAnnotations-handler-" + testutil.RandSeq(5)
 	arsConfigmapAnnotated                   = "testconfigmapAnnotated-handler-" + testutil.RandSeq(5)
 	arsConfigMapWithNonAnnotatedDeployment  = "testconfigmapNonAnnotatedDeployment-handler-" + testutil.RandSeq(5)
-	arsSecretWithSecretAutoAnnotation       = "testsecretWithSecretAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
-	arsConfigmapWithConfigMapAutoAnnotation = "testconfigmapWithConfigmapAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
+	arsSecretWithSecretAutoAnnotation       = "testsecretwithsecretautoannotationdeployment-handler-" + testutil.RandSeq(5)
+	arsConfigmapWithConfigMapAutoAnnotation = "testconfigmapwithconfigmapautoannotationdeployment-handler-" + testutil.RandSeq(5)
 
 	ersNamespace                            = "test-handler-" + testutil.RandSeq(5)
 	ersConfigmapName                        = "testconfigmap-handler-" + testutil.RandSeq(5)
@@ -65,8 +65,8 @@ var (
 	ersConfigmapWithPodAnnotations          = "testconfigmapPodAnnotations-handler-" + testutil.RandSeq(5)
 	ersConfigmapWithBothAnnotations         = "testconfigmapBothAnnotations-handler-" + testutil.RandSeq(5)
 	ersConfigmapAnnotated                   = "testconfigmapAnnotated-handler-" + testutil.RandSeq(5)
-	ersSecretWithSecretAutoAnnotation       = "testsecretWithSecretAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
-	ersConfigmapWithConfigMapAutoAnnotation = "testconfigmapWithConfigmapAutoAnnotationDeployment-handler-" + testutil.RandSeq(5)
+	ersSecretWithSecretAutoAnnotation       = "testsecretwithsecretautoannotationdeployment-handler-" + testutil.RandSeq(5)
+	ersConfigmapWithConfigMapAutoAnnotation = "testconfigmapwithconfigmapautoannotationdeployment-handler-" + testutil.RandSeq(5)
 )
 
 func TestMain(m *testing.M) {
@@ -75,17 +75,17 @@ func TestMain(m *testing.M) {
 	testutil.CreateNamespace(arsNamespace, clients.KubernetesClient)
 	testutil.CreateNamespace(ersNamespace, clients.KubernetesClient)
 
-	logrus.Infof("Setting up the env-var reload strategy test resources")
-	setupArs()
 	logrus.Infof("Setting up the annotation reload strategy test resources")
+	setupArs()
+	logrus.Infof("Setting up the env-var reload strategy test resources")
 	setupErs()
 
 	logrus.Infof("Running Testcases")
 	retCode := m.Run()
 
-	logrus.Infof("tearing down the env-var reload strategy test resources")
-	teardownArs()
 	logrus.Infof("tearing down the annotation reload strategy test resources")
+	teardownArs()
+	logrus.Infof("tearing down the env-var reload strategy test resources")
 	teardownErs()
 
 	os.Exit(retCode)
@@ -193,7 +193,7 @@ func setupArs() {
 	_, err = testutil.CreateConfigMap(clients.KubernetesClient, arsNamespace, arsConfigmapWithConfigMapAutoAnnotation, "www.google.com")
 	if err != nil {
 		logrus.Errorf("Error in configmap creation: %v", err)
-	}	
+	}
 
 	// Creating Deployment with configmap
 	_, err = testutil.CreateDeployment(clients.KubernetesClient, arsConfigmapName, arsNamespace, true)
@@ -297,9 +297,15 @@ func setupArs() {
 	}
 
 	// Creating Deployment with secret and with secret auto annotation
-	_, err = testutil.CreateDeploymentWithTypedAutoAnnotation(clients.KubernetesClient, arsSecretWithSecretAutoAnnotation, arsNamespace, "secret")
+	_, err = testutil.CreateDeploymentWithTypedAutoAnnotation(clients.KubernetesClient, arsSecretWithSecretAutoAnnotation, arsNamespace, testutil.SecretResourceType)
 	if err != nil {
 		logrus.Errorf("Error in Deployment with secret and with secret auto annotation: %v", err)
+	}
+
+	// Creating Deployment with secret and with secret auto annotation
+	_, err = testutil.CreateDeploymentWithTypedAutoAnnotation(clients.KubernetesClient, arsConfigmapWithConfigMapAutoAnnotation, arsNamespace, testutil.ConfigmapResourceType)
+	if err != nil {
+		logrus.Errorf("Error in Deployment with configmap and with configmap auto annotation: %v", err)
 	}
 
 	// Creating DaemonSet with configmap
@@ -495,6 +501,12 @@ func teardownArs() {
 	deploymentError = testutil.DeleteDeployment(clients.KubernetesClient, arsNamespace, arsSecretWithSecretAutoAnnotation)
 	if deploymentError != nil {
 		logrus.Errorf("Error while deleting deployment with secret auto annotation %v", deploymentError)
+	}
+
+	// Deleting Deployment with configmap and configmap auto annotation
+	deploymentError = testutil.DeleteDeployment(clients.KubernetesClient, arsNamespace, arsConfigmapWithConfigMapAutoAnnotation)
+	if deploymentError != nil {
+		logrus.Errorf("Error while deleting deployment with configmap auto annotation %v", deploymentError)
 	}
 
 	// Deleting DaemonSet with configmap
@@ -869,6 +881,18 @@ func setupErs() {
 		logrus.Errorf("Error in Deployment with secret configmap as envFrom source creation: %v", err)
 	}
 
+	// Creating Deployment with secret and with secret auto annotation
+	_, err = testutil.CreateDeploymentWithTypedAutoAnnotation(clients.KubernetesClient, ersSecretWithSecretAutoAnnotation, ersNamespace, testutil.SecretResourceType)
+	if err != nil {
+		logrus.Errorf("Error in Deployment with secret and with secret auto annotation: %v", err)
+	}
+
+	// Creating Deployment with secret and with secret auto annotation
+	_, err = testutil.CreateDeploymentWithTypedAutoAnnotation(clients.KubernetesClient, ersConfigmapWithConfigMapAutoAnnotation, ersNamespace, testutil.ConfigmapResourceType)
+	if err != nil {
+		logrus.Errorf("Error in Deployment with configmap and with configmap auto annotation: %v", err)
+	}
+
 	// Creating DaemonSet with configmap
 	_, err = testutil.CreateDaemonSet(clients.KubernetesClient, ersConfigmapName, ersNamespace, true)
 	if err != nil {
@@ -1057,6 +1081,18 @@ func teardownErs() {
 		logrus.Errorf("Error while deleting deployment with search annotation %v", deploymentError)
 	}
 
+	// Deleting Deployment with secret and secret auto annotation
+	deploymentError = testutil.DeleteDeployment(clients.KubernetesClient, ersNamespace, ersSecretWithSecretAutoAnnotation)
+	if deploymentError != nil {
+		logrus.Errorf("Error while deleting deployment with secret auto annotation %v", deploymentError)
+	}
+
+	// Deleting Deployment with configmap and configmap auto annotation
+	deploymentError = testutil.DeleteDeployment(clients.KubernetesClient, ersNamespace, ersConfigmapWithConfigMapAutoAnnotation)
+	if deploymentError != nil {
+		logrus.Errorf("Error while deleting deployment with configmap auto annotation %v", deploymentError)
+	}
+
 	// Deleting DaemonSet with configmap
 	daemonSetError := testutil.DeleteDaemonSet(clients.KubernetesClient, ersNamespace, ersConfigmapName)
 	if daemonSetError != nil {
@@ -1235,18 +1271,19 @@ func teardownErs() {
 
 }
 
-func getConfigWithAnnotations(resourceType string, name string, shaData string, annotation string) util.Config {
+func getConfigWithAnnotations(resourceType string, name string, shaData string, annotation string, typedAutoAnnotation string) util.Config {
 	ns := ersNamespace
 	if options.ReloadStrategy == constants.AnnotationsReloadStrategy {
 		ns = arsNamespace
 	}
 
 	return util.Config{
-		Namespace:    ns,
-		ResourceName: name,
-		SHAValue:     shaData,
-		Annotation:   annotation,
-		Type:         resourceType,
+		Namespace:            ns,
+		ResourceName:         name,
+		SHAValue:             shaData,
+		Annotation:           annotation,
+		TypedAutoAnnotation:  typedAutoAnnotation,
+		Type:                 resourceType,
 	}
 }
 
@@ -1261,7 +1298,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1286,7 +1323,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapWithoutReloadAnnotationAndWitho
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigMapWithNonAnnotatedDeployment, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigMapWithNonAnnotatedDeployment, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigMapWithNonAnnotatedDeployment, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1313,7 +1350,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapWithoutReloadAnnotationButWithA
 	defer func() { options.AutoReloadAll = false }()
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigMapWithNonAnnotatedDeployment, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigMapWithNonAnnotatedDeployment, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigMapWithNonAnnotatedDeployment, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1338,7 +1375,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapInProjectedVolumeUsingArs(t *te
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsProjectedConfigMapName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1362,7 +1399,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapViaSearchAnnotationUsingArs(t *
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapAnnotated, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapAnnotated, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapAnnotated, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	config.ResourceAnnotations = map[string]string{"reloader.stakater.com/match": "true"}
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
@@ -1387,7 +1424,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapViaSearchAnnotationNoTriggersUs
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapAnnotated, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapAnnotated, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapAnnotated, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	config.ResourceAnnotations = map[string]string{"reloader.stakater.com/match": "false"}
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
@@ -1427,7 +1464,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapViaSearchAnnotationNotMappedUsi
 	// defer clients.KubernetesClient.AppsV1().Deployments(namespace).Delete(deployment.Name, &v1.DeleteOptions{})
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapAnnotated, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapAnnotated, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapAnnotated, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	config.ResourceAnnotations = map[string]string{"reloader.stakater.com/match": "false"}
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
@@ -1452,7 +1489,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapInInitContainerUsingArs(t *test
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithInitContainer, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1477,7 +1514,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapInProjectVolumeInInitContainerU
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsProjectedConfigMapWithInitContainer, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1502,7 +1539,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapAsEnvVarUsingArs(t *testing.T) 
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithEnvName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1527,7 +1564,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapAsEnvVarInInitContainerUsingArs
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithInitEnv, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithInitEnv, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithInitEnv, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1552,7 +1589,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapAsEnvVarFromUsingArs(t *testing
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithEnvFromName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithEnvFromName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithEnvFromName, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1577,7 +1614,7 @@ func TestRollingUpgradeForDeploymentWithSecretUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1602,7 +1639,7 @@ func TestRollingUpgradeForDeploymentWithSecretInProjectedVolumeUsingArs(t *testi
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsProjectedSecretName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1627,7 +1664,7 @@ func TestRollingUpgradeForDeploymentWithSecretinInitContainerUsingArs(t *testing
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretWithInitContainer, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1652,7 +1689,7 @@ func TestRollingUpgradeForDeploymentWithSecretInProjectedVolumeinInitContainerUs
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsProjectedSecretWithInitContainer, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1677,7 +1714,7 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretWithEnvName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithEnvName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithEnvName, shaData, options.ReloaderAutoAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1702,7 +1739,7 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarFromUsingArs(t *testing.T)
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretWithEnvFromName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithEnvFromName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithEnvFromName, shaData, options.ReloaderAutoAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1727,7 +1764,7 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarInInitContainerUsingArs(t 
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretWithInitEnv, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithInitEnv, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithInitEnv, shaData, options.ReloaderAutoAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1748,11 +1785,61 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarInInitContainerUsingArs(t 
 	}
 }
 
+func TestRollingUpgradeForDeploymentWithSecretAutoAnnotationUsingArs(t *testing.T) {
+	options.ReloadStrategy = constants.AnnotationsReloadStrategy
+
+	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretWithSecretAutoAnnotation, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretWithSecretAutoAnnotation, shaData, "", options.SecretReloaderAutoAnnotation)
+	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
+	collectors := getCollectors()
+
+	err := PerformRollingUpgrade(clients, config, deploymentFuncs, collectors, nil)
+	time.Sleep(5 * time.Second)
+	if err != nil {
+		t.Errorf("Rolling upgrade failed for Deployment with Secret")
+	}
+
+	logrus.Infof("Verifying deployment update")
+	updated := testutil.VerifyResourceAnnotationUpdate(clients, config, deploymentFuncs)
+	if !updated {
+		t.Errorf("Deployment was not updated")
+	}
+
+	if promtestutil.ToFloat64(collectors.Reloaded.With(labelSucceeded)) != 1 {
+		t.Errorf("Counter was not increased")
+	}
+}
+
+func TestRollingUpgradeForDeploymentWithConfigMapAutoAnnotationUsingArs(t *testing.T) {
+	options.ReloadStrategy = constants.AnnotationsReloadStrategy
+
+	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithConfigMapAutoAnnotation, "www.facebook.com")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithConfigMapAutoAnnotation, shaData, "", options.ConfigmapReloaderAutoAnnotation)
+	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
+	collectors := getCollectors()
+
+	err := PerformRollingUpgrade(clients, config, deploymentFuncs, collectors, nil)
+	time.Sleep(5 * time.Second)
+	if err != nil {
+		t.Errorf("Rolling upgrade failed for Deployment with ConfigMap")
+	}
+
+	logrus.Infof("Verifying deployment update")
+	updated := testutil.VerifyResourceAnnotationUpdate(clients, config, deploymentFuncs)
+	if !updated {
+		t.Errorf("Deployment was not updated")
+	}
+
+	if promtestutil.ToFloat64(collectors.Reloaded.With(labelSucceeded)) != 1 {
+		t.Errorf("Counter was not increased")
+	}
+}
+
 func TestRollingUpgradeForDaemonSetWithConfigmapUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapName, "www.facebook.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1777,7 +1864,7 @@ func TestRollingUpgradeForDaemonSetWithConfigmapInProjectedVolumeUsingArs(t *tes
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsProjectedConfigMapName, "www.facebook.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1802,7 +1889,7 @@ func TestRollingUpgradeForDaemonSetWithConfigmapAsEnvVarUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithEnvName, "www.facebook.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1827,7 +1914,7 @@ func TestRollingUpgradeForDaemonSetWithSecretUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretName, "d3d3LmZhY2Vib29rLmNvbQ==")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1852,7 +1939,7 @@ func TestRollingUpgradeForDaemonSetWithSecretInProjectedVolumeUsingArs(t *testin
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsProjectedSecretName, "d3d3LmZhY2Vib29rLmNvbQ==")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1877,7 +1964,7 @@ func TestRollingUpgradeForStatefulSetWithConfigmapUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapName, "www.twitter.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1902,7 +1989,7 @@ func TestRollingUpgradeForStatefulSetWithConfigmapInProjectedVolumeUsingArs(t *t
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsProjectedConfigMapName, "www.twitter.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1927,7 +2014,7 @@ func TestRollingUpgradeForStatefulSetWithSecretUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsSecretName, "d3d3LnR3aXR0ZXIuY29t")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1952,7 +2039,7 @@ func TestRollingUpgradeForStatefulSetWithSecretInProjectedVolumeUsingArs(t *test
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, arsNamespace, arsProjectedSecretName, "d3d3LnR3aXR0ZXIuY29t")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, arsProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -1977,7 +2064,7 @@ func TestRollingUpgradeForDeploymentWithPodAnnotationsUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapWithPodAnnotations, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithPodAnnotations, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapWithPodAnnotations, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2029,7 +2116,7 @@ func TestFailedRollingUpgradeUsingArs(t *testing.T) {
 	options.ReloadStrategy = constants.AnnotationsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, arsNamespace, arsConfigmapName, "fail.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, arsConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	deploymentFuncs.UpdateFunc = func(_ kube.Clients, _ string, _ runtime.Object) error {
 		return fmt.Errorf("error")
@@ -2047,7 +2134,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2072,7 +2159,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapInProjectedVolumeUsingErs(t *te
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersProjectedConfigMapName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2096,7 +2183,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapViaSearchAnnotationUsingErs(t *
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapAnnotated, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapAnnotated, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapAnnotated, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	config.ResourceAnnotations = map[string]string{"reloader.stakater.com/match": "true"}
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
@@ -2121,7 +2208,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapViaSearchAnnotationNoTriggersUs
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapAnnotated, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapAnnotated, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapAnnotated, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	config.ResourceAnnotations = map[string]string{"reloader.stakater.com/match": "false"}
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
@@ -2161,7 +2248,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapViaSearchAnnotationNotMappedUsi
 	// defer clients.KubernetesClient.AppsV1().Deployments(namespace).Delete(deployment.Name, &v1.DeleteOptions{})
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapAnnotated, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapAnnotated, shaData, "")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapAnnotated, shaData, "", options.ConfigmapReloaderAutoAnnotation)
 	config.ResourceAnnotations = map[string]string{"reloader.stakater.com/match": "false"}
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
@@ -2186,7 +2273,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapInInitContainerUsingErs(t *test
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithInitContainer, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2211,7 +2298,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapInProjectVolumeInInitContainerU
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersProjectedConfigMapWithInitContainer, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapWithInitContainer, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2236,7 +2323,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapAsEnvVarUsingErs(t *testing.T) 
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithEnvName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2261,7 +2348,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapAsEnvVarInInitContainerUsingErs
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithInitEnv, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithInitEnv, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithInitEnv, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2286,7 +2373,7 @@ func TestRollingUpgradeForDeploymentWithConfigmapAsEnvVarFromUsingErs(t *testing
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithEnvFromName, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithEnvFromName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithEnvFromName, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2311,7 +2398,7 @@ func TestRollingUpgradeForDeploymentWithSecretUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2336,7 +2423,7 @@ func TestRollingUpgradeForDeploymentWithSecretInProjectedVolumeUsingErs(t *testi
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersProjectedSecretName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2361,7 +2448,7 @@ func TestRollingUpgradeForDeploymentWithSecretinInitContainerUsingErs(t *testing
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretWithInitContainer, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2386,7 +2473,7 @@ func TestRollingUpgradeForDeploymentWithSecretInProjectedVolumeinInitContainerUs
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersProjectedSecretWithInitContainer, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretWithInitContainer, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2411,7 +2498,7 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretWithEnvName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithEnvName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithEnvName, shaData, options.ReloaderAutoAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2436,7 +2523,7 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarFromUsingErs(t *testing.T)
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretWithEnvFromName, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithEnvFromName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithEnvFromName, shaData, options.ReloaderAutoAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2461,7 +2548,7 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarInInitContainerUsingErs(t 
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretWithInitEnv, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithInitEnv, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithInitEnv, shaData, options.ReloaderAutoAnnotation, options.SecretReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2482,11 +2569,61 @@ func TestRollingUpgradeForDeploymentWithSecretAsEnvVarInInitContainerUsingErs(t 
 	}
 }
 
+func TestRollingUpgradeForDeploymentWithSecretAutoAnnotationUsingErs(t *testing.T) {
+	options.ReloadStrategy = constants.EnvVarsReloadStrategy
+
+	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretWithSecretAutoAnnotation, "dGVzdFVwZGF0ZWRTZWNyZXRFbmNvZGluZ0ZvclJlbG9hZGVy")
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretWithSecretAutoAnnotation, shaData, "", options.SecretReloaderAutoAnnotation)
+	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
+	collectors := getCollectors()
+
+	err := PerformRollingUpgrade(clients, config, deploymentFuncs, collectors, nil)
+	time.Sleep(5 * time.Second)
+	if err != nil {
+		t.Errorf("Rolling upgrade failed for Deployment with Secret")
+	}
+
+	logrus.Infof("Verifying deployment update")
+	updated := testutil.VerifyResourceEnvVarUpdate(clients, config, constants.SecretEnvVarPostfix, deploymentFuncs)
+	if !updated {
+		t.Errorf("Deployment was not updated")
+	}
+
+	if promtestutil.ToFloat64(collectors.Reloaded.With(labelSucceeded)) != 1 {
+		t.Errorf("Counter was not increased")
+	}
+}
+
+func TestRollingUpgradeForDeploymentWithConfigMapAutoAnnotationUsingErs(t *testing.T) {
+	options.ReloadStrategy = constants.EnvVarsReloadStrategy
+
+	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithConfigMapAutoAnnotation, "www.facebook.com")
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithConfigMapAutoAnnotation, shaData, "", options.ConfigmapReloaderAutoAnnotation)
+	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
+	collectors := getCollectors()
+
+	err := PerformRollingUpgrade(clients, config, deploymentFuncs, collectors, nil)
+	time.Sleep(5 * time.Second)
+	if err != nil {
+		t.Errorf("Rolling upgrade failed for Deployment with ConfigMap")
+	}
+
+	logrus.Infof("Verifying deployment update")
+	updated := testutil.VerifyResourceEnvVarUpdate(clients, config, constants.ConfigmapEnvVarPostfix, deploymentFuncs)
+	if !updated {
+		t.Errorf("Deployment was not updated")
+	}
+
+	if promtestutil.ToFloat64(collectors.Reloaded.With(labelSucceeded)) != 1 {
+		t.Errorf("Counter was not increased")
+	}
+}
+
 func TestRollingUpgradeForDaemonSetWithConfigmapUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapName, "www.facebook.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2511,7 +2648,7 @@ func TestRollingUpgradeForDaemonSetWithConfigmapInProjectedVolumeUsingErs(t *tes
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersProjectedConfigMapName, "www.facebook.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2536,7 +2673,7 @@ func TestRollingUpgradeForDaemonSetWithConfigmapAsEnvVarUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithEnvName, "www.facebook.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithEnvName, shaData, options.ReloaderAutoAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2561,7 +2698,7 @@ func TestRollingUpgradeForDaemonSetWithSecretUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretName, "d3d3LmZhY2Vib29rLmNvbQ==")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2586,7 +2723,7 @@ func TestRollingUpgradeForDaemonSetWithSecretInProjectedVolumeUsingErs(t *testin
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersProjectedSecretName, "d3d3LmZhY2Vib29rLmNvbQ==")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	daemonSetFuncs := GetDaemonSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2611,7 +2748,7 @@ func TestRollingUpgradeForStatefulSetWithConfigmapUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapName, "www.twitter.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2636,7 +2773,7 @@ func TestRollingUpgradeForStatefulSetWithConfigmapInProjectedVolumeUsingErs(t *t
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersProjectedConfigMapName, "www.twitter.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersProjectedConfigMapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2661,7 +2798,7 @@ func TestRollingUpgradeForStatefulSetWithSecretUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersSecretName, "d3d3LnR3aXR0ZXIuY29t")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2686,7 +2823,7 @@ func TestRollingUpgradeForStatefulSetWithSecretInProjectedVolumeUsingErs(t *test
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.SecretResourceType, ersNamespace, ersProjectedSecretName, "d3d3LnR3aXR0ZXIuY29t")
-	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.SecretEnvVarPostfix, ersProjectedSecretName, shaData, options.SecretUpdateOnChangeAnnotation, options.SecretReloaderAutoAnnotation)
 	statefulSetFuncs := GetStatefulSetRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2711,7 +2848,7 @@ func TestRollingUpgradeForDeploymentWithPodAnnotationsUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapWithPodAnnotations, "www.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithPodAnnotations, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapWithPodAnnotations, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	collectors := getCollectors()
 
@@ -2764,7 +2901,7 @@ func TestFailedRollingUpgradeUsingErs(t *testing.T) {
 	options.ReloadStrategy = constants.EnvVarsReloadStrategy
 
 	shaData := testutil.ConvertResourceToSHA(testutil.ConfigmapResourceType, ersNamespace, ersConfigmapName, "fail.stakater.com")
-	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation)
+	config := getConfigWithAnnotations(constants.ConfigmapEnvVarPostfix, ersConfigmapName, shaData, options.ConfigmapUpdateOnChangeAnnotation, options.ConfigmapReloaderAutoAnnotation)
 	deploymentFuncs := GetDeploymentRollingUpgradeFuncs()
 	deploymentFuncs.UpdateFunc = func(_ kube.Clients, _ string, _ runtime.Object) error {
 		return fmt.Errorf("error")

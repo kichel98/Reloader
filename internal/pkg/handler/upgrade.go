@@ -208,8 +208,8 @@ func PerformRollingUpgrade(clients kube.Clients, config util.Config, upgradeFunc
 		result := constants.NotUpdated
 		reloaderEnabled, _ := strconv.ParseBool(reloaderEnabledValue)
 		typedAutoAnnotationEnabled, _ := strconv.ParseBool(typedAutoAnnotationEnabledValue)
-		if reloaderEnabled || typedAutoAnnotationEnabled || reloaderEnabledValue == "" && options.AutoReloadAll { // TODO: check
-			result = invokeReloadStrategy(upgradeFuncs, i, config, true) // TODO: check
+		if reloaderEnabled || typedAutoAnnotationEnabled || reloaderEnabledValue == "" && typedAutoAnnotationEnabledValue == "" && options.AutoReloadAll {
+			result = invokeReloadStrategy(upgradeFuncs, i, config, true)
 		}
 
 		if result != constants.Updated && annotationValue != "" {
